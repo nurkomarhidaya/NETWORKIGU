@@ -1,0 +1,1078 @@
+
+rfs4000-F958DD>sh run
+!
+! Configuration of RFS4000 version 5.8.3.1-002R
+!
+!
+version 2.5
+customize show-wireless-client mac radio-id radio-type ip ap-name wlan vlan
+!
+!
+client-identity-group default
+ load default-fingerprints
+!
+ip access-list ACL_VLAN1
+ permit udp host 192.168.1.229 eq 67 any eq dhcpc rule-precedence 10
+ permit udp any any eq dhcps rule-precedence 20
+ permit udp any any eq dns rule-precedence 30
+ permit tcp 192.168.100.0/23 host 192.168.100.1 eq 880 rule-precedence 40
+ deny ip 192.168.100.0/23 10.0.0.0/8 rule-precedence 50
+ deny ip 192.168.100.0/23 172.16.0.0/12 rule-precedence 60
+ deny ip 192.168.100.0/23 192.168.0.0/16 rule-precedence 70
+ permit ip any any rule-precedence 100
+!
+ip access-list ACL_VLAN9
+ permit udp host 192.168.9.229 eq 67 any eq dhcpc rule-precedence 10
+ permit udp any any eq dhcps rule-precedence 20
+ permit udp any any eq dns rule-precedence 30
+ permit tcp 192.168.9.0/24 host 192.168.9.229 eq 880 rule-precedence 40
+ deny ip 192.168.9.0/24 10.0.0.0/8 rule-precedence 50
+ deny ip 192.168.9.0/24 172.16.0.0/12 rule-precedence 60
+ deny ip 192.168.9.0/24 192.168.0.0/16 rule-precedence 71
+ permit ip any any rule-precedence 80
+!
+ip access-list BROADCAST-MULTICAST-CONTROL
+ permit tcp any any rule-precedence 10 rule-description "permit all TCP traffic"
+ permit udp any eq 67 any eq dhcpc rule-precedence 11 rule-description "permit DHCP replies"
+ deny udp any range 137 138 any range 137 138 rule-precedence 20 rule-description "deny windows netbios"
+ deny ip any 224.0.0.0/4 rule-precedence 21 rule-description "deny IP multicast"
+ deny ip any host 255.255.255.255 rule-precedence 22 rule-description "deny IP local broadcast"
+ permit ip any any rule-precedence 100 rule-description "permit all IP traffic"
+!
+ip access-list NAT
+ permit ip 192.168.100.0/23 any rule-precedence 10
+ permit ip 192.168.104.0/24 any rule-precedence 20
+!
+ip access-list NAT-VLAN9
+ permit ip 192.168.102.0/23 any rule-precedence 10
+!
+mac access-list PERMIT-ARP-AND-IPv4
+ permit any any type ip rule-precedence 10 rule-description "permit all IPv4 traffic"
+ permit any any type arp rule-precedence 20 rule-description "permit all ARP traffic"
+!
+ip snmp-access-list default
+ permit any
+!
+firewall-policy default
+ no ip dos smurf
+ no ip dos twinge
+ no ip dos invalid-protocol
+ no ip dos router-advt
+ no ip dos router-solicit
+ no ip dos option-route
+ no ip dos ascend
+ no ip dos chargen
+ no ip dos fraggle
+ no ip dos snork
+ no ip dos ftp-bounce
+ no ip dos tcp-intercept
+ no ip dos broadcast-multicast-icmp
+ no ip dos land
+ no ip dos tcp-xmas-scan
+ no ip dos tcp-null-scan
+ no ip dos winnuke
+ no ip dos tcp-fin-scan
+ no ip dos udp-short-hdr
+ no ip dos tcp-post-syn
+ no ip dos tcphdrfrag
+ no ip dos ip-ttl-zero
+ no ip dos ipspoof
+ no ip dos tcp-bad-sequence
+ no ip dos tcp-sequence-past-window
+ no ip-mac conflict
+ no ip-mac routing conflict
+ dhcp-offer-convert
+ no ipv6 strict-ext-hdr-check
+ no ipv6 unknown-options
+ no ipv6 duplicate-options
+ no ipv6 option strict-hao-opt-check
+ no ipv6 option strict-padding
+ no stateful-packet-inspection-l2
+ no ipv6-mac conflict
+ no ipv6-mac routing conflict
+!
+!
+mint-policy global-default
+!
+meshpoint-qos-policy default
+!
+wlan-qos-policy QOS-WLAN-LIMIT-BW
+ rate-limit wlan to-air rate 50
+ rate-limit wlan from-air rate 50
+ qos trust dscp
+ qos trust wmm
+!
+wlan-qos-policy default
+ qos trust dscp
+ qos trust wmm
+!
+radio-qos-policy default
+!
+aaa-policy AAA-POLICY-SARANA
+ authentication server 1 onboard controller
+!
+aaa-policy AAA-POLICY-USER
+ authentication server 1 onboard controller
+!
+association-acl-policy "MAC List"
+ permit B8-6C-E8-70-42-27 B8-6C-E8-70-42-27 precedence 2
+ permit D8-9C-67-B7-21-75 D8-9C-67-B7-21-75 precedence 3
+ permit 7C-0B-C6-0C-11-38 7C-0B-C6-0C-11-38 precedence 7
+ permit 9C-30-5B-73-F5-41 9C-30-5B-73-F5-41 precedence 8
+ permit 28-C2-DD-91-77-CB 28-C2-DD-91-77-CB precedence 9
+ permit 74-40-BB-D4-A4-09 74-40-BB-D4-A4-09 precedence 10
+ permit 0C-D2-92-B0-D4-3E 0C-D2-92-B0-D4-3E precedence 11
+ permit 60-45-CB-7A-9B-86 60-45-CB-7A-9B-86 precedence 12
+ permit 28-C2-DD-65-C4-25 28-C2-DD-65-C4-25 precedence 13
+ permit F0-03-8C-86-4A-83 F0-03-8C-86-4A-83 precedence 14
+ permit 28-C2-DD-91-76-FE 28-C2-DD-91-76-FE precedence 15
+ permit 10-5B-AD-47-F7-5D 10-5B-AD-47-F7-5D precedence 16
+ permit C0-D0-12-9B-AC-46 C0-D0-12-9B-AC-46 precedence 17
+ permit 20-5E-F7-B6-BC-46 20-5E-F7-B6-BC-46 precedence 18
+ permit D8-63-75-96-89-98 D8-63-75-96-89-98 precedence 19
+ permit 48-5A-B6-82-46-6F 48-5A-B6-82-46-6F precedence 20
+ permit 54-35-30-1F-D8-DD 54-35-30-1F-D8-DD precedence 21
+ permit 48-5A-3F-69-C0-6A 48-5A-3F-69-C0-6A precedence 22
+ permit 4C-74-BF-BB-98-CF 4C-74-BF-BB-98-CF precedence 23
+ permit C0-D0-12-B8-01-61 C0-D0-12-B8-01-61 precedence 24
+ permit 68-A3-C4-5A-34-C7 68-A3-C4-5A-34-C7 precedence 25
+ permit E8-50-8B-9B-16-EA E8-50-8B-9B-16-EA precedence 26
+ permit 30-CB-F8-59-BC-C7 30-CB-F8-59-BC-C7 precedence 27
+ permit D4-90-9C-96-55-35 D4-90-9C-96-55-35 precedence 28
+ permit B0-52-16-1C-81-7F B0-52-16-1C-81-7F precedence 29
+ permit FC-01-7C-27-AF-AF FC-01-7C-27-AF-AF precedence 30
+ permit 08-C5-E1-10-E5-ED 08-C5-E1-10-E5-ED precedence 31
+ permit 28-C2-DD-53-2F-CE 28-C2-DD-53-2F-CE precedence 32
+ permit 20-5E-F7-B6-B6-0E 20-5E-F7-B6-B6-0E precedence 33
+ permit 00-24-D7-CB-FE-2C 00-24-D7-CB-FE-2C precedence 34
+ permit 74-C6-3B-C9-3C-61 74-C6-3B-C9-3C-61 precedence 35
+ permit 28-C2-DD-91-77-C7 28-C2-DD-91-77-C7 precedence 36
+ permit 3C-F8-62-3D-C5-E8 3C-F8-62-3D-C5-E8 precedence 37
+ permit 60-67-20-D2-2D-9C 60-67-20-D2-2D-9C precedence 39
+ permit B4-CB-57-7C-87-6F B4-CB-57-7C-87-6F precedence 40
+ permit 78-02-F8-3C-4D-8E 78-02-F8-3C-4D-8E precedence 42
+ permit F0-03-8C-6E-FF-63 F0-03-8C-6E-FF-63 precedence 43
+ permit B0-52-16-68-44-11 B0-52-16-68-44-11 precedence 44
+ permit 9C-D2-1E-7E-0A-19 9C-D2-1E-7E-0A-19 precedence 45
+ permit EC-D0-9F-45-7B-CB EC-D0-9F-45-7B-CB precedence 46
+ permit 40-33-1A-31-0E-96 40-33-1A-31-0E-96 precedence 49
+ permit 3C-F8-62-58-9B-43 3C-F8-62-58-9B-43 precedence 50
+ permit 84-38-38-12-0F-65 84-38-38-12-0F-65 precedence 51
+ permit A0-91-69-CD-78-AF A0-91-69-CD-78-AF precedence 52
+ permit F0-6D-78-82-52-F7 F0-6D-78-82-52-F7 precedence 53
+ permit 0C-D2-92-7B-D2-AC 0C-D2-92-7B-D2-AC precedence 55
+ permit 10-2A-B3-C4-04-62 10-2A-B3-C4-04-62 precedence 56
+ permit 28-56-5A-A8-C3-F9 28-56-5A-A8-C3-F9 precedence 57
+ permit 28-C2-DD-65-C5-CA 28-C2-DD-65-C5-CA precedence 58
+ permit 3C-B6-B7-31-11-8B 3C-B6-B7-31-11-8B precedence 59
+ permit 5C-93-A2-BE-E6-EF 5C-93-A2-BE-E6-EF precedence 60
+ permit 88-D5-0C-38-64-A8 88-D5-0C-38-64-A8 precedence 63
+ permit 8C-85-90-6C-BD-66 8C-85-90-6C-BD-66 precedence 66
+ permit 34-08-BC-E0-A8-24 34-08-BC-E0-A8-24 precedence 67
+ permit E4-02-9B-EC-4F-C3 E4-02-9B-EC-4F-C3 precedence 68
+ permit 28-C2-DD-91-77-CF 28-C2-DD-91-77-CF precedence 69
+ permit 38-CA-DA-2C-28-44 38-CA-DA-2C-28-44 precedence 70
+ permit 3C-F8-62-F9-FC-27 3C-F8-62-F9-FC-27 precedence 71
+ permit 80-B0-3D-79-04-A0 80-B0-3D-79-04-A0 precedence 75
+ permit 60-67-20-D2-2D-9C 60-67-20-D2-2D-9C precedence 76
+ permit 1C-48-CE-9E-3E-7D 1C-48-CE-9E-3E-7D precedence 79
+ permit C0-87-EB-65-35-E1 C0-87-EB-65-35-E1 precedence 80
+ permit A0-32-99-3C-C8-78 A0-32-99-3C-C8-78 precedence 81
+ permit F0-18-98-55-10-EE F0-18-98-55-10-EE precedence 82
+ permit 28-C2-DD-91-77-C7 28-C2-DD-91-77-C7 precedence 83
+ permit B8-86-87-59-3C-EF B8-86-87-59-3C-EF precedence 84
+ permit 2C-0E-3D-21-C3-4E 2C-0E-3D-21-CE-4E precedence 85
+ permit CC-08-8D-51-F2-BB CC-08-8D-51-F2-BB precedence 86
+ permit 88-D5-0C-16-2E-86 88-D5-0C-16-2E-86 precedence 87
+ permit 20-5E-F7-B6-C1-F2 20-5E-F7-B6-C1-F2 precedence 88
+ permit E4-C4-83-49-19-1B E4-C4-83-49-19-1B precedence 89
+ permit F0-98-9D-1B-FA-A6 F0-98-9D-1B-FA-A6 precedence 90
+ permit 28-C2-DD-65-00-D8 28-C2-DD-65-00-D8 precedence 91
+ permit 80-00-6E-14-5D-58 80-00-6E-14-5D-58 precedence 92
+ permit 28-C2-DD-91-77-9A 28-C2-DD-91-77-9A precedence 93
+ permit 28-C2-DD-65-6A-42 28-C2-DD-65-6A-42 precedence 94
+ permit 2C-5B-B8-30-20-23 2C-5B-B8-30-20-23 precedence 95
+ permit CC-2D-83-AA-50-F8 CC-2D-83-AA-50-F8 precedence 96
+ permit F0-98-9D-BB-E5-57 F0-98-9D-BB-E5-57 precedence 97
+ permit 0C-A8-A7-5C-5E-60 0C-A8-A7-5C-5E-60 precedence 98
+ permit 20-5E-F7-B6-B6-78 20-5E-F7-B6-B6-78 precedence 99
+ permit 9C-AD-97-5F-A6-DC 9C-AD-97-5F-A6-DC precedence 100
+ permit B8-86-87-59-1F-6F B8-86-87-59-1F-6F precedence 101
+ permit 00-0A-F5-2F-8E-B8 00-0A-F5-2F-8E-B8 precedence 102
+ permit 54-35-30-00-EA-15 54-35-30-00-EA-15 precedence 103
+ permit C0-87-EB-18-2D-4D C0-87-EB-18-2D-4D precedence 104
+ permit C8-FF-28-78-DB-AD C8-FF-28-78-DB-AD precedence 105
+ permit 20-F7-7C-0C-D3-B9 20-F7-7C-0C-D3-B9 precedence 106
+ permit 48-5A-B6-73-E6-CF 48-5A-B6-73-E6-CF precedence 107
+ permit FC-E9-98-C5-07-F5 FC-E9-98-C5-07-F5 precedence 108
+ permit 20-5E-F7-B6-BC-36 20-5E-F7-B6-BC-36 precedence 109
+ permit 24-18-1D-49-39-C5 24-18-1D-49-39-C5 precedence 110
+ permit B4-CB-57-7C-95-21 B4-CB-57-7C-95-21 precedence 111
+ permit 0C-A8-A7-E4-68-74 0C-A8-A7-E4-68-74 precedence 112
+ permit C4-98-80-C4-01-E9 C4-98-80-C4-01-E9 precedence 113
+ permit B0-52-16-46-68-B5 B0-52-16-46-68-B5 precedence 114
+ permit D0-C5-F3-0B-A0-F0 D0-C5-F3-0B-A0-F0 precedence 115
+ permit 40-E2-30-CF-80-77 40-E2-30-CF-80-77 precedence 116
+ permit 6C-C7-EC-2C-3D-04 6C-C7-EC-2C-3D-04 precedence 118
+ permit F8-C3-9E-C3-DE-84 F8-C3-9E-C3-DE-84 precedence 119
+ permit 80-A5-89-96-B8-2D 80-A5-89-96-B8-2D precedence 120
+ permit CC-44-63-B3-08-CA CC-44-63-B3-08-CA precedence 121
+ permit 30-84-54-E5-DB-AF 30-84-54-E5-DB-AF precedence 122
+ permit 18-65-90-5D-4D-4F 18-65-90-5D-4D-4F precedence 123
+ permit 20-F7-7C-33-67-51 20-F7-7C-33-67-51 precedence 124
+ permit 04-0C-CE-D9-8A-34 04-0C-CE-D9-8A-34 precedence 125
+ permit F8-E9-4E-03-9D-93 F8-E9-4E-03-9D-93 precedence 126
+ permit D0-4F-7E-52-71-57 D0-4F-7E-52-71-57 precedence 127
+ permit 04-0C-CE-D9-8A-34 04-0C-CE-D9-8A-34 precedence 128
+ permit 08-E6-89-A4-6B-74 08-E6-89-A4-6B-74 precedence 129
+ permit 3C-F8-62-58-DE-0F 3C-F8-62-58-DE-0F precedence 130
+ permit AC-7B-A1-10-0C-66 AC-7B-A1-10-0C-66 precedence 131
+ permit 70-A2-B3-BD-65-1A 70-A2-B3-BD-65-1A precedence 132
+ permit AC-5F-3E-5F-E2-47 AC-5F-3E-5F-E2-47 precedence 133
+ permit 54-35-30-00-EA-15 54-35-30-00-EA-15 precedence 134
+ permit 0C-D2-92-88-5E-19 0C-D2-92-88-5E-19 precedence 135
+ permit 9C-30-5B-B2-68-35 9C-30-5B-B2-68-35 precedence 136
+ permit FC-E9-98-C5-07-F5 FC-E9-98-C5-07-F5 precedence 137
+ permit 58-E6-BA-7A-59-AF 58-E6-BA-7A-59-AF precedence 138
+ permit B4-AE-2B-D7-C4-EE B4-AE-2B-D7-C4-EE precedence 139
+ permit 90-E1-7B-03-6E-AB 90-E1-7B-03-6E-AB precedence 140
+ permit 30-52-CB-D9-52-D0 30-52-CB-D9-52-D0 precedence 141
+ permit A8-1B-5A-D3-AE-7E A8-1B-5A-D3-AE-7E precedence 142
+ permit 8C-FE-57-BD-A0-32 BC-FE-57-BD-A0-32 precedence 143
+ permit E0-AC-CB-72-1C-C6 E0-AC-CB-72-1C-C6 precedence 144
+ permit C4-8E-8F-B0-5B-F3 C4-8E-8F-B0-5B-F3 precedence 145
+ permit 40-F0-2F-59-55-5D 40-F0-2F-59-55-5D precedence 146
+ permit 54-35-30-80-25-11 54-35-30-80-25-11 precedence 147
+ permit 28-C2-DD-91-77-CF 28-C2-DD-91-77-CF precedence 148
+ permit 98-3B-8F-03-B1-F5 98-3B-8F-03-B1-F5 precedence 149
+ permit F0-03-8C-84-5E-2F F0-03-BC-84-5E-2F precedence 150
+ permit 10-02-B5-6F-B7-B0 10-02-B5-6F-B7-B0 precedence 151
+ permit 88-D5-0C-1D-91-05 88-D5-0C-1D-91-05 precedence 152
+ permit 28-C2-DD-0D-6E-8D 28-C2-DD-0D-6E-8D precedence 153
+ permit 3C-6A-A7-CD-60-4F 3C-6A-A7-CD-60-4F precedence 154
+ permit 0C-A8-A7-B6-14-B6 0C-A8-A7-B6-14-B6 precedence 155
+ permit 64-5A-ED-14-0E-D9 64-5A-ED-14-0E-D9 precedence 156
+ permit 48-5A-B6-73-E6-CF 48-5A-B6-73-E6-CF precedence 157
+ permit 1C-48-CE-9E-3E-7D 1C-48-CE-9E-3E-7D precedence 158
+ permit 6C-2B-59-43-4A-40 6C-2B-59-43-4A-40 precedence 160
+ permit 28-3A-4D-5B-43-15 28-3A-4D-5B-43-15 precedence 161
+ permit 0C-98-38-DB-DC-07 0C-98-38-DB-DC-07 precedence 162
+ permit 90-61-AE-9F-6D-2F 90-61-AE-9F-6D-2F precedence 163
+ permit 0C-D2-92-88-5E-19 0C-D2-92-88-5E-19 precedence 164
+ permit 90-00-4E-B3-3F-D0 90-00-4E-B3-3F-D0 precedence 165
+ permit 5C-93-A2-BE-C3-0B 5C-93-A2-BE-C3-0B precedence 166
+ permit 74-1B-B2-6A-FA-39 74-1B-B2-6A-FA-39 precedence 167
+ permit CC-25-EF-C1-53-EB CC-25-EF-C1-53-EB precedence 168
+ permit C0-87-EB-95-30-91 C0-87-EB-95-30-91 precedence 169
+ permit E4-02-9B-86-3D-AF E4-02-9B-86-3D-AF precedence 170
+ permit 3C-B6-B7-2F-13-25 3C-B6-B7-2F-13-25 precedence 171
+ permit 0C-98-38-CB-35-D9 0C-98-38-CB-35-D9 precedence 172
+ permit 74-C6-3B-B9-B6-87 74-C6-3B-B9-B6-87 precedence 173
+ permit D8-9C-67-B7-A4-F7 D8-9C-67-B7-A4-F7 precedence 174
+ permit 08-F4-AB-71-DE-97 08-F4-AB-71-DE-97 precedence 175
+ permit 74-40-BB-D4-52-51 74-40-BB-D4-52-51 precedence 176
+ permit 64-DB-43-35-2A-4F 64-DB-43-35-2A-4F precedence 177
+ permit E0-AC-CB-72-1C-C6 E0-AC-CB-72-1C-C6 precedence 178
+ permit F4-60-E2-21-F7-18 F4-60-E2-21-F7-18 precedence 179
+ permit 20-5E-F7-B6-B6-AA 20-5E-F7-B6-B6-AA precedence 180
+ permit 0C-D2-92-88-5E-19 0C-D2-92-88-5E-19 precedence 181
+ permit 60-57-18-03-6F-1A 60-57-18-03-6F-1A precedence 182
+ permit 20-5E-F7-9C-71-3E 20-5E-F7-9C-71-3E precedence 183
+ permit F0-03-8C-84-5E-2F F0-03-8C-84-5E-2F precedence 185
+ permit 28-C2-DD-65-C4-25 28-C2-DD-65-C4-25 precedence 186
+ permit F8-FF-C2-6C-FA-02 F8-FF-C2-6C-FA-02 precedence 187
+ permit 3C-6A-A7-8F-B2-8C 3C-6A-A7-8F-B2-8C precedence 188
+ permit E4-2B-34-86-CF-2F E4-2B-34-86-CF-2F precedence 189
+ permit 1C-CC-D6-FA-A5-21 1C-CC-D6-FA-A5-21 precedence 190
+ permit B0-68-E6-76-FE-09 B0-68-E6-76-FE-09 precedence 191
+ permit 7C-A1-AE-60-6E-81 7C-A1-AE-60-6E-81 precedence 192
+ permit DC-FB-48-9D-68-22 DC-FB-48-9D-68-22 precedence 193
+ permit E0-33-8E-44-B8-59 E0-33-8E-44-B8-59 precedence 194
+ permit 48-5A-B6-73-35-EF 48-5A-B6-73-35-EF precedence 195
+ permit 6C-C7-EC-6B-0E-46 6C-C7-EC-6B-0E-46 precedence 197
+ permit F0-6D-78-7F-62-B9 F0-6D-78-7F-62-B9 precedence 198
+ permit E4-02-9B-86-3D-AF E4-02-9B-86-3D-AF precedence 199
+ permit F0-98-9D-1B-FA-A7 F0-98-9D-1B-FA-A7 precedence 200
+ permit 74-DE-2B-86-48-C8 74-DE-2B-86-48-C8 precedence 201
+ permit 24-77-03-7C-BA-00 24-77-03-7C-BA-00 precedence 202
+ permit 40-5B-D8-9D-62-E7 40-5B-D8-9D-62-E7 precedence 203
+ permit 40-5B-D8-9C-74-C5 40-5B-D8-9C-74-C5 precedence 204
+ permit 28-E3-47-23-5D-E9 28-E3-47-23-5D-E9 precedence 205
+ permit A4-C3-F0-9E-D4-41 A4-C3-F0-9E-D4-41 precedence 206
+ permit AC-E0-10-2E-DC-19 AC-E0-10-2E-DC-19 precedence 207
+ permit 5C-EA-1D-C4-96-A9 5C-EA-1D-C4-96-A9 precedence 209
+ permit 0C-A8-A7-B6-14-B6 0C-A8-A7-B6-14-B6 precedence 210
+ permit 44-4A-DB-C1-43-EF 44-4A-DB-C1-43-EF precedence 211
+ permit 48-D2-24-3D-E8-12 48-D2-24-3D-E8-12 precedence 212
+ permit 3C-F8-62-58-9B-43 3C-F8-62-58-9B-43 precedence 213
+ permit AC-D5-64-51-33-6D AC-D5-64-51-33-6D precedence 214
+ permit E4-CE-8F-32-A3-7E E4-CE-8F-32-A3-7E precedence 215
+ permit D4-D2-52-CF-C4-8E D4-D2-52-CF-C4-8E precedence 216
+ permit 3C-22-FB-63-16-57 3C-22-FB-63-16-57 precedence 217
+ permit 40-5B-D8-CC-60-E9 40-5B-D8-CC-60-E9 precedence 218
+ permit BC-09-63-18-B3-96 BC-09-63-18-B3-96 precedence 219
+ permit C0-A6-00-70-39-B0 C0-A6-00-70-39-B0 precedence 220
+ permit 68-BF-C4-2F-1F-7A 68-BF-C4-2F-1F-7A precedence 221
+ permit AC-38-70-14-59-9F AC-38-70-14-59-9F precedence 222
+ permit F0-6D-78-80-07-E5 F0-6D-78-80-07-E5 precedence 224
+ permit A4-D9-90-D9-E3-3F A4-D9-90-D9-E3-3F precedence 225
+ permit 7C-F9-0E-00-75-98 7C-F9-0E-00-75-98 precedence 226
+ permit A8-A7-95-C0-13-A7 A8-A7-95-C0-13-A7 precedence 227
+ permit 42-24-D5-49-74-E6 42-24-D5-49-74-E6 precedence 228
+ permit E8-2A-44-B3-54-19 E8-2A-44-B3-54-19 precedence 229
+ permit 68-BF-C4-2F-1F-7A 68-BF-C4-2F-1F-7A precedence 230
+ permit 28-56-5A-A8-C3-F9 28-56-5A-A8-C3-F9 precedence 231
+ permit F8-C3-9E-C3-DE-84 F8-C3-9E-C3-DE-84 precedence 232
+ permit E8-6F-38-CC-7D-73 E8-6F-38-CC-7D-73 precedence 233
+ permit 58-A0-23-69-55-32 58-A0-23-69-55-32 precedence 234
+ deny 00-00-00-00-00-00 FF-FF-FF-FF-FF-FF precedence 999
+!
+association-acl-policy Test
+ permit BE-CA-C0-37-81-8D BE-CA-C0-37-81-8D precedence 1
+ permit 28-C2-DD-91-77-9A 28-C2-DD-91-77-9A precedence 2
+ permit 16-6E-55-0A-20-8B 16-6E-55-0A-20-8B precedence 3
+ permit F0-6D-78-80-07-E5 F0-6D-78-80-07-E5 precedence 4
+ permit A8-A7-95-C0-13-A7 A8-A7-95-C0-13-A7 precedence 5
+ permit BE-CA-C0-37-81-8D BE-CA-C0-37-81-8D precedence 6
+!
+association-acl-policy "mac psw list"
+ permit 00-EC-0A-CE-D8-B3 00-EC-0A-CE-D8-B3 precedence 1
+ deny B8-6C-E8-70-42-27 B8-6C-E8-70-42-27 precedence 2
+ permit 20-5E-F7-B6-B6-AA 20-5E-F7-B6-B6-AA precedence 3
+ permit 20-F7-7C-0C-D3-B9 20-F7-7C-0C-D3-B9 precedence 4
+ permit 28-56-5A-A8-C3-F9 28-56-5A-A8-C3-F9 precedence 5
+ permit 28-BE-03-98-12-F4 28-BE-03-98-12-F4 precedence 6
+ permit 28-C2-DD-65-C5-CA 28-C2-DD-65-C5-CA precedence 7
+ permit 28-C2-DD-91-77-CF 28-C2-DD-91-77-CF precedence 8
+ permit 30-52-CB-D9-52-D0 30-52-CB-D9-52-D0 precedence 9
+ permit 38-CA-DA-2C-28-44 38-CA-DA-2C-28-44 precedence 10
+ permit 54-35-30-1F-D8-DD 54-35-30-1F-D8-DD precedence 11
+ permit 60-67-20-D2-2D-9C 60-67-20-D2-2D-9C precedence 12
+ permit 74-C6-3B-C9-3C-61 74-C6-3B-C9-3C-61 precedence 13
+ permit 80-B0-3D-79-04-A0 80-B0-3D-79-04-A0 precedence 14
+ permit 84-38-38-12-0F-65 84-38-38-12-0F-65 precedence 15
+ permit 84-A1-34-93-BE-7B 84-A1-34-93-BE-7B precedence 16
+ permit 88-D5-0C-38-64-A8 88-D5-0C-38-64-A8 precedence 17
+ permit 94-87-E0-64-22-C6 94-87-E0-64-22-C6 precedence 18
+ permit 9C-AD-97-5F-A6-DC 9C-AD-97-5F-A6-DC precedence 19
+ permit CC-08-8D-51-F2-BB CC-08-8D-51-F2-BB precedence 20
+ permit D0-C5-F3-0B-A0-F0 D0-C5-F3-0B-A0-F0 precedence 21
+ permit D8-63-75-96-89-98 D8-63-75-96-89-98 precedence 22
+ permit E4-02-9B-EC-4F-C3 E4-02-9B-EC-4F-C3 precedence 23
+ permit E4-2B-34-86-CF-2F E4-2B-34-86-CF-2F precedence 24
+ permit 88-D5-0C-1D-91-05 88-D5-0C-1D-91-05 precedence 25
+ permit F0-98-9D-1B-FA-A6 F0-98-9D-1B-FA-A6 precedence 26
+ permit 28-C2-DD-65-00-D8 28-C2-DD-65-00-D8 precedence 27
+ permit 0C-D2-92-B0-D4-3E 0C-D2-92-B0-D4-3E precedence 28
+ permit E0-AC-CB-72-1C-C6 E0-AC-CB-72-1C-C6 precedence 29
+ permit E4-2B-34-86-CF-2F E4-2B-34-86-CF-2F precedence 30
+ permit EC-2C-E2-33-5E-9B EC-2C-E2-33-5E-9B precedence 31
+ permit 28-E3-47-23-5D-E9 28-E3-47-23-5D-EF precedence 32
+ permit 3C-F8-62-58-9B-43 3C-F8-62-58-9B-43 precedence 33
+ permit 58-A0-23-69-55-32 58-A0-23-69-55-32 precedence 34
+!
+dns-whitelist Hostpot
+ permit 192.168.100.1
+!
+captive-portal HostspotIndo
+ server host 192.168.100.1
+ server mode centralized
+ webpage internal org-name PT INDOGUNA UTAMA
+ webpage internal org-signature PT INDOGUNA UTAMA. All Rights Reserved.
+ webpage internal login org-background-color #3399cc
+ webpage internal login body-font-color #3399cc
+ webpage internal welcome org-background-color #3366cc
+ use aaa-policy AAA-POLICY-USER
+ use dns-whitelist Hostpot
+ webpage internal registration field city type text enable label "City" placeholder "Enter City"
+ webpage internal registration field name type text enable label "Full Name" placeholder "Enter First Name, Last Name"
+ webpage internal registration field zip type number enable label "Zip" placeholder "Zip"
+ webpage internal registration field via-sms type checkbox enable title "SMS Preferred"
+ webpage internal registration field mobile type number enable label "Mobile" placeholder "Mobile Number with Country code"
+ webpage internal registration field gender type dropdown-menu enable label "Gender" title "Gender"
+ webpage internal registration field optout type checkbox enable title "Do not remember and use my details"
+ webpage internal registration field member type text enable label "Loyalty/Member Card Number" placeholder "Enter Loyalty/Member Card Number"
+ webpage internal registration field dob type date enable label "Date of Birth" placeholder "MM/DD/YYYY"
+ webpage internal registration field street type text enable label "Address" placeholder "123 Any Street"
+ webpage internal registration field country type dropdown-menu enable label "Country" title "Enter State, Country"
+ webpage internal registration field age-range type dropdown-menu enable label "Age Range" title "Age Range"
+ webpage internal registration field email type e-address enable mandatory label "Email" placeholder "you@domain.com"
+ webpage internal registration field via-email type checkbox enable title "Email Preferred"
+ webpage internal registration field disclaimer type checkbox enable title "Use of this information is subject to our Terms and Conditions. By clicking Register, you agree to the terms of this Disclaimer"
+!
+captive-portal HostspotSarana
+ server host 192.168.9.229
+ server mode centralized
+ use aaa-policy AAA-POLICY-SARANA
+ use dns-whitelist Hostpot
+ webpage internal registration field city type text enable label "City" placeholder "Enter City"
+ webpage internal registration field name type text enable label "Full Name" placeholder "Enter First Name, Last Name"
+ webpage internal registration field zip type number enable label "Zip" placeholder "Zip"
+ webpage internal registration field via-sms type checkbox enable title "SMS Preferred"
+ webpage internal registration field mobile type number enable label "Mobile" placeholder "Mobile Number with Country code"
+ webpage internal registration field gender type dropdown-menu enable label "Gender" title "Gender"
+ webpage internal registration field optout type checkbox enable title "Do not remember and use my details"
+ webpage internal registration field member type text enable label "Loyalty/Member Card Number" placeholder "Enter Loyalty/Member Card Number"
+ webpage internal registration field dob type date enable label "Date of Birth" placeholder "MM/DD/YYYY"
+ webpage internal registration field street type text enable label "Address" placeholder "123 Any Street"
+ webpage internal registration field country type dropdown-menu enable label "Country" title "Enter State, Country"
+ webpage internal registration field age-range type dropdown-menu enable label "Age Range" title "Age Range"
+ webpage internal registration field email type e-address enable mandatory label "Email" placeholder "you@domain.com"
+ webpage internal registration field via-email type checkbox enable title "Email Preferred"
+ webpage internal registration field disclaimer type checkbox enable title "Use of this information is subject to our Terms and Conditions. By clicking Register, you agree to the terms of this Disclaimer"
+!
+wlan Hotspot-Indoguna
+ ssid HostspotIgu
+ vlan 100
+ bridging-mode tunnel
+ encryption-type none
+ authentication-type none
+ use wlan-qos-policy QOS-WLAN-LIMIT-BW
+ use aaa-policy AAA-POLICY-USER
+ use captive-portal HostspotIndo
+ captive-portal-enforcement
+ use ip-access-list in ACL_VLAN1
+!
+wlan Hotspot-Sarana
+ ssid HotspotSarana
+ vlan 9
+ bridging-mode tunnel
+ encryption-type none
+ authentication-type none
+ use wlan-qos-policy QOS-WLAN-LIMIT-BW
+ use aaa-policy AAA-POLICY-SARANA
+ use captive-portal HostspotSarana
+ captive-portal-enforcement
+ use ip-access-list in ACL_VLAN9
+!
+wlan Indoguna
+ ssid Indoguna-EAP
+ vlan 100
+ bridging-mode tunnel
+ encryption-type tkip-ccmp
+ authentication-type eap
+ use aaa-policy AAA-POLICY-USER
+ use association-acl-policy "MAC List"
+!
+wlan Indoguna-PSK
+ ssid Indoguna-PSW
+ vlan 100
+ bridging-mode tunnel
+ encryption-type tkip-ccmp
+ authentication-type none
+ wpa-wpa2 psk 0 admin4321
+ use association-acl-policy "MAC List"
+!
+wlan Kendaraan
+ ssid Kendaraan
+ vlan 9
+ bridging-mode tunnel
+ encryption-type tkip-ccmp
+ authentication-type none
+ wpa-wpa2 psk 0 admin54321
+!
+wlan Sarana
+ ssid Sarana-EAP
+ vlan 9
+ bridging-mode tunnel
+ encryption-type ccmp
+ authentication-type eap
+ use aaa-policy AAA-POLICY-USER
+!
+wlan Sarana-PSK
+ ssid Sarana-PSW
+ vlan 9
+ bridging-mode tunnel
+ encryption-type ccmp
+ authentication-type none
+ wpa-wpa2 psk 0 admin4321
+!
+smart-rf-policy SMARTRF
+ channel-list 5GHz 149,153,157,161
+ channel-width 5GHz 20MHz
+!
+auto-provisioning-policy AUTOPROV7532
+ adopt ap7532 precedence 10 profile PROFILE-SARANA rf-domain INDOGUNA any
+ adopt ap7522 precedence 50 profile PROFILE7522-SARANA rf-domain INDOGUNA any
+!
+radius-group HostspotIgu
+ guest
+ policy ssid HostspotIgu
+ policy day mo
+ policy day tu
+ policy day we
+ policy day th
+ policy day fr
+ policy day sa
+!
+radius-group HostspotSarana
+ guest
+ policy ssid HotspotSarana
+!
+radius-group RAD-IGU-MGM
+ policy ssid Indoguna-EAP
+!
+radius-group RAD-IGU-MGR
+ policy ssid Indoguna-EAP
+ rate-limit from-air 10240
+ rate-limit to-air 10240
+!
+radius-group RAD-INDO-ADMIN
+ policy ssid Indoguna-EAP
+ rate-limit from-air 3072
+ rate-limit to-air 3072
+!
+radius-group RAD-INDO-MANAGEMENT
+ policy ssid Indoguna-EAP
+ rate-limit from-air 10240
+ rate-limit to-air 10240
+!
+radius-group RAD-INDO-MANAGER
+ policy ssid Indoguna-EAP
+ rate-limit from-air 5120
+ rate-limit to-air 5120
+!
+radius-group RAD-SARANA-ADMIN
+ policy ssid Sarana-EAP
+ rate-limit from-air 3072
+ rate-limit to-air 3072
+!
+radius-group RAD-SARANA-MANAGEMENT
+ policy ssid Sarana-EAP
+ rate-limit from-air 10240
+ rate-limit to-air 10240
+!
+radius-group RAD-SARANA-MANAGER
+ policy ssid Sarana-EAP
+ rate-limit from-air 5120
+ rate-limit to-air 5120
+!
+radius-group RAD-STAFF-INDOGUNA
+ policy ssid Indoguna-EAP
+!
+radius-group RAD-STAFF-SARANA
+ policy ssid Sarana-EAP
+!
+radius-user-pool-policy HostspotIguna
+ user indogun@ password 0 indogun@01
+!
+radius-user-pool-policy HostspotSar
+!
+radius-user-pool-policy RAD-POOL-STAFF
+ user herwanti password 0 herwanti01 group RAD-STAFF-INDOGUNA
+ user fitriyanti password 0 fitriyanti01 group RAD-STAFF-INDOGUNA
+ user dina password 0 dina2018 group RAD-STAFF-INDOGUNA
+ user echa password 0 echa01 group RAD-STAFF-INDOGUNA
+ user reza02 password 0 reza02 group RAD-STAFF-INDOGUNA
+ user meutia password 0 meutia01 group RAD-STAFF-INDOGUNA
+ user pritha password 0 pritha01 group RAD-STAFF-INDOGUNA
+ user bossillu password 0 bossillu group RAD-IGU-MGR
+ user cahyandani password 0 cahyandani01 group RAD-STAFF-INDOGUNA
+ user sima password 0 sima01 group RAD-STAFF-INDOGUNA
+ user iren password 0 iren01 group RAD-INDO-MANAGEMENT
+ user wisye password 0 wisye01 group RAD-STAFF-INDOGUNA
+ user melani password 0 melani01 group RAD-IGU-MGR
+ user marisca password 0 marisca01 group RAD-STAFF-INDOGUNA
+ user dean password 0 dean01 group RAD-IGU-MGM
+ user iankailola password 0 iankailola01 group RAD-STAFF-INDOGUNA
+ user nurul password 0 nurul01 group RAD-STAFF-INDOGUNA
+ user melinda password 0 melinda01 group RAD-STAFF-INDOGUNA
+ user adhit password 0 adhit01 group RAD-STAFF-INDOGUNA
+ user patricia password 0 patricia01 group RAD-STAFF-INDOGUNA
+ user ghees password 0 ghees01 group RAD-STAFF-INDOGUNA
+ user yulfit password 0 yulfit01 group RAD-STAFF-INDOGUNA
+ user bayu password 0 bayu01 group RAD-STAFF-INDOGUNA
+ user efendy password 0 efendy group RAD-IGU-MGM
+ user ayu password 0 ayu01 group RAD-STAFF-INDOGUNA
+ user andhika password 0 andhika01 group RAD-STAFF-INDOGUNA
+ user muttia password 0 muttia01 group RAD-STAFF-INDOGUNA
+ user imam password 0 imam01 group RAD-STAFF-INDOGUNA
+ user jayamartha password 0 jayamartha group RAD-IGU-MGR
+ user putri password 0 putri01 group RAD-STAFF-INDOGUNA
+ user ariani password 0 ariani01 group RAD-STAFF-INDOGUNA
+ user feby password 0 feby group RAD-IGU-MGM
+ user dika password 0 dika01 group RAD-STAFF-INDOGUNA
+ user indahsetyorini password 0 indahsetyorini01 group RAD-STAFF-INDOGUNA
+ user yamida password 0 yamida01 group RAD-IGU-MGR
+ user sitasari password 0 sitasari01 group RAD-STAFF-INDOGUNA
+ user vio password 0 vio group RAD-IGU-MGM
+ user maulyda password 0 maulyda01 group RAD-STAFF-INDOGUNA
+ user igiboga password 0 igiboga group RAD-SARANA-ADMIN RAD-STAFF-INDOGUNA
+ user taufikyunus password 0 taufikyunus01 group RAD-STAFF-INDOGUNA
+ user rahmaini password 0 rahmaini01 group RAD-STAFF-INDOGUNA
+ user elvia password 0 elvia01 group RAD-STAFF-INDOGUNA
+ user bambang password 0 bambang01 group RAD-STAFF-INDOGUNA
+ user agus password 0 agus01 group RAD-STAFF-INDOGUNA
+ user Beti password 0 beti01 group RAD-STAFF-INDOGUNA
+ user basuni password 0 basuni01 group RAD-STAFF-INDOGUNA
+ user srimariati password 0 srimariati01 group RAD-STAFF-INDOGUNA
+ user evi password 0 evi01 group RAD-STAFF-INDOGUNA
+ user dimas password 0 dimas01 group RAD-STAFF-INDOGUNA
+ user kent password 0 kent group RAD-IGU-MGM RAD-SARANA-MANAGER
+ user riska password 0 riska01 group RAD-STAFF-INDOGUNA
+ user keynie password 0 keynie group RAD-IGU-MGM
+ user lissetiawaty password 0 lissetiawaty01 group RAD-STAFF-INDOGUNA
+ user erwin password 0 erwin group RAD-IGU-MGM
+ user moranda password 0 moranda01 group RAD-STAFF-INDOGUNA
+ user hendro password 0 hendro01 group RAD-IGU-MGR
+ user oktiindah password 0 oktiindah01 group RAD-STAFF-INDOGUNA
+ user ferry password 0 ferry01 group RAD-STAFF-INDOGUNA
+ user rahma password 0 rahma01 group RAD-STAFF-INDOGUNA
+ user arya password 0 arya group RAD-IGU-MGM
+ user kentliman password 0 kentliman group RAD-IGU-MGM
+ user donni password 0 donni01 group RAD-STAFF-INDOGUNA
+ user hutami password 0 hutami01 group RAD-STAFF-INDOGUNA
+ user mewar password 0 mewar01 group RAD-STAFF-INDOGUNA
+ user arfianti password 0 arfianti01 group RAD-STAFF-INDOGUNA
+ user fiandini password 0 fiandini01 group RAD-STAFF-INDOGUNA
+ user kresna password 0 kresna01 group RAD-STAFF-INDOGUNA
+ user juard02 password 0 juard02 group RAD-IGU-MGM
+ user annisa password 0 annisa01 group RAD-STAFF-INDOGUNA
+ user illu password 0 illu01 group RAD-IGU-MGM
+ user komar password 0 komar01 group RAD-IGU-MGM
+ user pri password 0 pri01 group RAD-IGU-MGM
+ user ridyan password 0 ridyan01 group RAD-STAFF-INDOGUNA
+ user reno password 0 reno01 group RAD-STAFF-INDOGUNA
+ user pinkan password 0 pinkan01 group RAD-STAFF-INDOGUNA
+ user arfi password 0 arfi01 group RAD-STAFF-INDOGUNA
+ user dianar password 0 dianar01 group RAD-IGU-MGR
+ user Dian password 0 dian01 group RAD-STAFF-INDOGUNA
+ user hidaya password 0 hidaya01 group RAD-IGU-MGM
+ user sridarni password 0 sridarni01 group RAD-STAFF-INDOGUNA
+ user muniroh password 0 muniroh01 group RAD-STAFF-INDOGUNA
+ user elke password 0 elke01 group RAD-STAFF-INDOGUNA
+ user silvester password 0 silvester group RAD-IGU-MGM
+ user mtaufik password 0 mtaufik01 group RAD-STAFF-INDOGUNA
+ user sisca password 0 sisca01 group RAD-IGU-MGR
+ user nani password 0 nani01 group RAD-STAFF-INDOGUNA
+ user vania password 0 vania group RAD-IGU-MGM
+ user siska password 0 siska01 group RAD-STAFF-INDOGUNA
+ user gabriela password 0 gabriela01 group RAD-STAFF-INDOGUNA
+ user farid password 0 farid group RAD-IGU-MGM
+ user setyorini password 0 setyorini01 group RAD-STAFF-INDOGUNA
+ user fsisca password 0 fsisca01 group RAD-STAFF-INDOGUNA
+ user yogi password 0 yogi01 group RAD-STAFF-INDOGUNA
+ user andyut password 0 andyut01 group RAD-IGU-MGR
+ user halimah password 0 halimah01 group RAD-STAFF-INDOGUNA
+ user sudar password 0 sudar01 group RAD-STAFF-INDOGUNA
+ user ferriyanto password 0 ferriyanto01 group RAD-STAFF-INDOGUNA
+ user boedi password 0 boedi01 group RAD-STAFF-INDOGUNA
+ user srianteng password 0 srianteng01 group RAD-STAFF-INDOGUNA
+ user rifa password 0 rifa01 group RAD-INDO-ADMIN RAD-STAFF-INDOGUNA
+ user joni password 0 joni01 group RAD-STAFF-INDOGUNA
+ user dwi password 0 dwi01 group RAD-STAFF-INDOGUNA
+ user tess password 0 tess1234 group RAD-STAFF-INDOGUNA
+ user dian password 0 dian01 group RAD-STAFF-INDOGUNA
+ user adit password 0 adit01 group RAD-STAFF-INDOGUNA
+ user elizabeth password 0 elizabeth group RAD-IGU-MGM
+ user elizabeth01 password 0 elizabeth01 group RAD-IGU-MGM
+ user diansyah password 0 diansyah01 group RAD-STAFF-INDOGUNA
+ user fita password 0 fita01 group RAD-STAFF-INDOGUNA
+ user nia password 0 nia01 group RAD-STAFF-INDOGUNA
+ user reza password 0 reza01 group RAD-STAFF-INDOGUNA
+ user setiawaty password 0 setiawaty01 group RAD-STAFF-INDOGUNA
+ user bilal password 0 bilal01 group RAD-STAFF-INDOGUNA
+ user maryati password 0 maryati01 group RAD-STAFF-INDOGUNA
+ user riskasitepu password 0 sitepu01 group RAD-STAFF-INDOGUNA
+ user juardeffendy password 0 juardeffendy group RAD-IGU-MGM
+ user soraya password 0 soraya group RAD-IGU-MGM
+ user nisha password 0 nisha01 group RAD-IGU-MGR
+ user aziz password 0 aziz01 group RAD-STAFF-INDOGUNA
+ user mardi password 0 mardi01 group RAD-STAFF-INDOGUNA
+ user david password 0 david01 group RAD-STAFF-INDOGUNA
+ user melodie password 0 melodie group RAD-IGU-MGM
+ user komalasari password 0 komalasari01 group RAD-STAFF-INDOGUNA
+ user anggraeni password 0 anggraeni01 group RAD-STAFF-INDOGUNA
+ user aksa password 0 aksa01 group RAD-STAFF-INDOGUNA
+ user steven password 0 steven01 group RAD-STAFF-INDOGUNA
+ user kevin password 0 kevin01 group RAD-STAFF-INDOGUNA
+ user WANTI password 0 WANTI01 group RAD-IGU-MGR
+ user sri password 0 sri01 group RAD-STAFF-INDOGUNA
+ user debbieipad password 0 debbieipad
+ user osena password 0 osena01 group RAD-STAFF-INDOGUNA
+ user ruly password 0 ruly01 group RAD-STAFF-INDOGUNA
+ user farida password 0 farida01 group RAD-STAFF-INDOGUNA
+ user imamsuyudin password 0 imamsuyudin group RAD-STAFF-INDOGUNA
+ user rizal password 0 rizal01 group RAD-STAFF-INDOGUNA
+ user juard password 0 juard01 group RAD-IGU-MGM
+ user febri password 0 febri01 group RAD-STAFF-INDOGUNA
+ user illu02 password 0 illu02 group RAD-IGU-MGR
+ user wina password 0 wina01 group RAD-STAFF-INDOGUNA
+ user darius password 0 darius01 group RAD-STAFF-INDOGUNA
+ user fransisca password 0 fransisca01 group RAD-IGU-MGR
+ user lilik password 0 lilik01 group RAD-STAFF-INDOGUNA
+ user sigit password 0 sigit01 group RAD-STAFF-INDOGUNA
+!
+radius-server-policy Hostspot1
+ use radius-user-pool-policy HostspotIguna
+!
+radius-server-policy Hostspot5
+!
+radius-server-policy HostspotS
+ use radius-user-pool-policy HostspotSar
+!
+radius-server-policy HostspotSar
+ use radius-user-pool-policy HostspotSar
+!
+radius-server-policy RAD-SERVER-POLICY-STAFF
+ use radius-user-pool-policy HostspotIguna
+ use radius-user-pool-policy RAD-POOL-STAFF
+ use radius-user-pool-policy HostspotSar
+!
+dhcp-server-policy DHCP-INDOGUNA
+ dhcp-pool VLAN100-INDOGUNA
+  network 192.168.100.0/23
+  address range 192.168.100.51 192.168.101.254
+  default-router 192.168.100.1
+  dns-server 192.168.1.242
+ dhcp-pool VLAN104-INDOGUNA
+  network 192.168.104.0/24
+  address range 192.168.104.20 192.168.104.230
+  default-router 192.168.104.1
+  dns-server 192.168.1.242
+ dhcp-pool VLAN9-INDOGUNA
+  network 192.168.9.0/24
+  address range 192.168.9.100 192.168.9.200
+  default-router 192.168.9.242
+  dns-server 192.168.9.242
+ dhcp-pool VLAN102-INDOGUNA
+  network 192.168.102.0/23
+  address range 192.168.102.50 192.168.102.240
+  default-router 192.168.102.1
+  dns-server 192.168.1.242
+!
+!
+management-policy default
+ no telnet
+ no http server
+ https server
+ ssh
+ user admin password 1 205ec150a0ab20fa07403770e184bf1e08f8ba12347d7c10b7e03a1a78a9a414 role superuser access all
+ user hotspot password 1 c8db7e54f883291d733e0678c89ea4e7b10d0e5a2d0933ad7e6b06bb5fbfeadb role web-user-admin
+ snmp-server community 0 private rw
+ snmp-server community 0 public ro
+ snmp-server user snmptrap v3 encrypted des auth md5 0 admin123
+ snmp-server user snmpmanager v3 encrypted des auth md5 0 admin123
+!
+ex3500-management-policy default
+ snmp-server community public ro
+ snmp-server community private rw
+ snmp-server notify-filter 1 remote 127.0.0.1
+ snmp-server view defaultview 1 included
+!
+ex3500-qos-class-map-policy default
+!
+ex3500-qos-policy-map default
+!
+l2tpv3 policy default
+!
+profile rfs4000 default-rfs4000
+ no mint mlcp vlan
+ autoinstall configuration
+ autoinstall firmware
+ crypto ikev1 policy ikev1-default
+  isakmp-proposal default encryption aes-256 group 2 hash sha
+ crypto ikev2 policy ikev2-default
+  isakmp-proposal default encryption aes-256 group 2 hash sha
+ crypto ipsec transform-set default esp-aes-256 esp-sha-hmac
+ crypto ikev1 remote-vpn
+ crypto ikev2 remote-vpn
+ crypto auto-ipsec-secure
+ crypto remote-vpn-client
+ interface radio1
+ interface radio2
+ interface up1
+ interface ge1
+ interface ge2
+ interface ge3
+ interface ge4
+ interface ge5
+ interface vlan1
+ interface vlan9
+ interface wwan1
+ interface pppoe1
+ use firewall-policy default
+ use client-identity-group default
+ logging on
+ service pm sys-restart
+ router ospf
+ router bgp
+!
+profile ap7532 PROFILE-SARANA
+ ip name-server 192.168.9.133
+ autoinstall configuration
+ autoinstall firmware
+ crypto ikev1 policy ikev1-default
+  isakmp-proposal default encryption aes-256 group 2 hash sha
+ crypto ikev2 policy ikev2-default
+  isakmp-proposal default encryption aes-256 group 2 hash sha
+ crypto ipsec transform-set default esp-aes-256 esp-sha-hmac
+ crypto ikev1 remote-vpn
+ crypto ikev2 remote-vpn
+ crypto auto-ipsec-secure
+ crypto load-management
+ crypto remote-vpn-client
+ interface radio1
+  wlan Indoguna bss 1 primary
+  wlan Sarana bss 2 primary
+  wlan Indoguna-PSK bss 3 primary
+  wlan Sarana-PSK bss 4 primary
+  wlan Hotspot-Indoguna bss 5 primary
+  wlan Hotspot-Sarana bss 6 primary
+ interface radio2
+  wlan Indoguna bss 1 primary
+  wlan Sarana bss 2 primary
+  wlan Indoguna-PSK bss 3 primary
+  wlan Sarana-PSK bss 4 primary
+  wlan Hotspot-Indoguna bss 5 primary
+  wlan Hotspot-Sarana bss 6 primary
+ interface ge1
+ interface vlan1
+ interface pppoe1
+ use firewall-policy default
+ use captive-portal server HostspotIndo
+ service pm sys-restart
+ router ospf
+!
+profile ap7522 PROFILE7522-INDOGUNA
+ no mint mlcp vlan
+ ip name-server 192.168.1.242
+ autoinstall configuration
+ autoinstall firmware
+ crypto ikev1 policy ikev1-default
+  isakmp-proposal default encryption aes-256 group 2 hash sha
+ crypto ikev2 policy ikev2-default
+  isakmp-proposal default encryption aes-256 group 2 hash sha
+ crypto ipsec transform-set default esp-aes-256 esp-sha-hmac
+ crypto ikev1 remote-vpn
+ crypto ikev2 remote-vpn
+ crypto auto-ipsec-secure
+ crypto load-management
+ crypto remote-vpn-client
+ interface radio1
+  wlan Indoguna bss 1 primary
+  wlan Indoguna-PSK bss 3 primary
+  wlan Hotspot-Indoguna bss 4 primary
+ interface radio2
+  wlan Indoguna bss 1 primary
+  wlan Indoguna-PSK bss 3 primary
+  wlan Hotspot-Indoguna bss 4 primary
+ interface ge1
+ interface pppoe1
+ use firewall-policy default
+ service pm sys-restart
+ router ospf
+!
+profile ap7522 PROFILE7522-SARANA
+ no mint mlcp vlan
+ ip name-server 192.168.9.133
+ autoinstall configuration
+ autoinstall firmware
+ crypto ikev1 policy ikev1-default
+  isakmp-proposal default encryption aes-256 group 2 hash sha
+ crypto ikev2 policy ikev2-default
+  isakmp-proposal default encryption aes-256 group 2 hash sha
+ crypto ipsec transform-set default esp-aes-256 esp-sha-hmac
+ crypto ikev1 remote-vpn
+ crypto ikev2 remote-vpn
+ crypto auto-ipsec-secure
+ crypto load-management
+ crypto remote-vpn-client
+ interface radio1
+  wlan Indoguna bss 1 primary
+  wlan Sarana bss 2 primary
+  wlan Indoguna-PSK bss 3 primary
+  wlan Hotspot-Indoguna bss 4 primary
+  wlan Hotspot-Sarana bss 5 primary
+ interface radio2
+  wlan Indoguna bss 1 primary
+  wlan Sarana bss 2 primary
+  wlan Indoguna-PSK bss 3 primary
+  wlan Hotspot-Indoguna bss 4 primary
+  wlan Hotspot-Sarana bss 5 primary
+ interface ge1
+ interface pppoe1
+ use firewall-policy default
+ service pm sys-restart
+ router ospf
+!
+profile ap7532 PROFILE7532-INDOGUNA
+ no mint mlcp vlan
+ autoinstall configuration
+ autoinstall firmware
+ crypto ikev1 policy ikev1-default
+  isakmp-proposal default encryption aes-256 group 2 hash sha
+ crypto ikev2 policy ikev2-default
+  isakmp-proposal default encryption aes-256 group 2 hash sha
+ crypto ipsec transform-set default esp-aes-256 esp-sha-hmac
+ crypto ikev1 remote-vpn
+ crypto ikev2 remote-vpn
+ crypto auto-ipsec-secure
+ crypto load-management
+ crypto remote-vpn-client
+ interface radio1
+  wlan Indoguna bss 1 primary
+  wlan Indoguna-PSK bss 3 primary
+  wlan Hotspot-Indoguna bss 5 primary
+ interface radio2
+  wlan Indoguna bss 1 primary
+  wlan Indoguna-PSK bss 3 primary
+  wlan Hotspot-Indoguna bss 5 primary
+ interface ge1
+ interface pppoe1
+ use firewall-policy default
+ service pm sys-restart
+ router ospf
+!
+profile ap7522 default-ap7522
+ no autoinstall configuration
+ no autoinstall firmware
+ crypto ikev1 policy ikev1-default
+  isakmp-proposal default encryption aes-256 group 2 hash sha
+ crypto ikev2 policy ikev2-default
+  isakmp-proposal default encryption aes-256 group 2 hash sha
+ crypto ipsec transform-set default esp-aes-256 esp-sha-hmac
+ crypto ikev1 remote-vpn
+ crypto ikev2 remote-vpn
+ crypto auto-ipsec-secure
+ crypto load-management
+ crypto remote-vpn-client
+ interface radio1
+ interface radio2
+ interface ge1
+ interface pppoe1
+ use firewall-policy default
+ service pm sys-restart
+ router ospf
+!
+profile ap621 default-ap621
+ autoinstall configuration
+ autoinstall firmware
+ interface radio1
+ interface ge1
+  switchport mode access
+  switchport access vlan 37
+ interface vlan1
+  ip address dhcp
+  ip address zeroconf secondary
+  ip dhcp client request options all
+ use firewall-policy default
+ configuration-persistence
+ service pm sys-restart
+!
+rf-domain INDOGUNA
+ location Jakarta
+ timezone Asia/Bangkok
+ country-code id
+!
+rf-domain default
+ no country-code
+!
+rfs4000 B4-C7-99-F9-58-DD
+ use profile default-rfs4000
+ use rf-domain INDOGUNA
+ hostname rfs4000-F958DD
+ license AP DEFAULT-6AP-LICENSE
+ license AAP d74e4655f60a3f43757dc0e16790bfc07b1ea2e508b9981888980d884f05ef1a7355c1c668e6a697
+ license ADSEC DEFAULT-ADV-SEC-LICENSE
+ no mint mlcp vlan
+ mint mlcp ip
+ ip default-gateway 192.168.1.242
+ use radius-server-policy RAD-SERVER-POLICY-STAFF
+ interface ge1
+  no shutdown
+  switchport mode access
+  switchport access vlan 1
+ interface ge2
+  switchport mode access
+  switchport access vlan 9
+ interface ge3
+  switchport mode access
+  switchport access vlan 1
+ interface ge4
+  switchport mode access
+  switchport access vlan 9
+ interface vlan1
+  ip address 192.168.251.131/23
+  no use ip-access-list in
+  ip nat outside
+ interface vlan9
+  ip address 192.168.9.229/24
+  no use ip-access-list in
+  ip nat outside
+  no shutdown
+ interface vlan100
+  ip address 192.168.100.1/23
+  ip nat inside
+ interface vlan104
+  ip address 192.168.104.1/24
+  ip nat inside
+ use dhcp-server-policy DHCP-INDOGUNA
+ no use auto-provisioning-policy
+ use captive-portal server HostspotIndo
+ use captive-portal server HostspotSarana
+ no use role-policy
+ logging on
+ ip nat inside source list NAT precedence 1 interface vlan1 overload
+ no cdp run
+ no lldp run
+!
+ap7532 74-67-F7-00-AD-1C
+ use profile PROFILE7532-INDOGUNA
+ use rf-domain INDOGUNA
+ hostname ap7532-00AD1C
+ no adoption-mode
+ interface vlan1
+  ip address 192.168.1.16/24
+ controller host 192.168.1.229
+!
+ap7532 74-67-F7-00-AD-30
+ use profile PROFILE7532-INDOGUNA
+ use rf-domain INDOGUNA
+ hostname ap7532-00AD30
+ no adoption-mode
+ interface vlan1
+  ip address 192.168.1.23/24
+ controller host 192.168.1.229
+!
+ap7532 74-67-F7-03-32-28
+ use profile PROFILE7532-INDOGUNA
+ use rf-domain INDOGUNA
+ hostname ap7532-033228
+ no adoption-mode
+ interface vlan1
+  ip address 192.168.1.25/24
+ controller host 192.168.1.229
+!
+ap7522 B8-50-01-1B-1C-A4
+ use profile PROFILE7522-SARANA
+ use rf-domain INDOGUNA
+ hostname ap7522-1B1CA4
+ interface vlan1
+  ip address dhcp
+ controller host 192.168.9.229
+!
+ap7522 B8-50-01-1B-30-31
+ use profile default-ap7522
+ use rf-domain default
+ hostname ap7522-1B3031
+!
+ap7522 B8-50-01-1B-30-FC
+ use profile PROFILE7522-SARANA
+ use rf-domain INDOGUNA
+ hostname ap7522-1B30FC
+ interface vlan1
+  ip address dhcp
+ controller host 192.168.9.229
+!
+ap7522 B8-50-01-1B-31-30
+ use profile PROFILE7522-INDOGUNA
+ use rf-domain INDOGUNA
+ hostname ap7522-1B3130
+ no adoption-mode
+ interface vlan1
+  ip address 192.168.1.20/24
+ controller host 192.168.1.229
+!
+!
+end
