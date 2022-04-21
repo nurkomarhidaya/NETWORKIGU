@@ -1,0 +1,145 @@
+
+ap7522-1B1CA4>sh run
+!
+! Configuration of AP7522 version 5.8.3.1-002R
+!
+!
+version 2.5
+!
+!
+client-identity-group default
+ load default-fingerprints
+!
+ip access-list BROADCAST-MULTICAST-CONTROL
+ permit tcp any any rule-precedence 10 rule-description "permit all TCP traffic"
+ permit udp any eq 67 any eq dhcpc rule-precedence 11 rule-description "permit DHCP replies"
+ deny udp any range 137 138 any range 137 138 rule-precedence 20 rule-description "deny windows netbios"
+ deny ip any 224.0.0.0/4 rule-precedence 21 rule-description "deny IP multicast"
+ deny ip any host 255.255.255.255 rule-precedence 22 rule-description "deny IP local broadcast"
+ permit ip any any rule-precedence 100 rule-description "permit all IP traffic"
+!
+ip access-list NAT
+ permit ip 192.168.100.0/23 any rule-precedence 10
+!
+mac access-list PERMIT-ARP-AND-IPv4
+ permit any any type ip rule-precedence 10 rule-description "permit all IPv4 traffic"
+ permit any any type arp rule-precedence 20 rule-description "permit all ARP traffic"
+!
+ip snmp-access-list default
+ permit any
+!
+firewall-policy default
+ no ip dos tcp-sequence-past-window
+ no stateful-packet-inspection-l2
+ ip tcp adjust-mss 1400
+!
+!
+mint-policy global-default
+!
+meshpoint-qos-policy default
+!
+wlan-qos-policy default
+ qos trust dscp
+ qos trust wmm
+!
+radio-qos-policy default
+!
+wlan Indoguna
+ ssid Indoguna.wifi1
+ vlan 100
+ bridging-mode local
+ encryption-type tkip-ccmp
+ authentication-type none
+ no fast-bss-transition over-ds
+ wpa-wpa2 psk 0 @dm!n.wifi2
+!
+dhcp-server-policy indoguna
+ dhcp-pool indoguna
+  network 192.168.100.0/23
+  address range 192.168.100.10 192.168.100.200
+  default-router 192.168.100.2
+  dns-server 192.168.250.1
+!
+!
+management-policy default
+ telnet
+ no http server
+ https server
+ ssh
+ user admin password 1 8dd9f0e8e08c157b7c356f97f63e5c77e577654b50230ca4c54d1971d9d7a4ed role superuser access all
+ snmp-server community 0 private rw
+ snmp-server community 0 public ro
+ snmp-server user snmptrap v3 encrypted des auth md5 0 admin123
+ snmp-server user snmpmanager v3 encrypted des auth md5 0 admin123
+!
+nsight-policy default
+!
+profile ap7522 default-ap7522
+ autoinstall configuration
+ autoinstall firmware
+ crypto ikev1 policy ikev1-default
+  isakmp-proposal default encryption aes-256 group 2 hash sha
+ crypto ikev2 policy ikev2-default
+  isakmp-proposal default encryption aes-256 group 2 hash sha
+ crypto ipsec transform-set default esp-aes-256 esp-sha-hmac
+ crypto ikev1 remote-vpn
+ crypto ikev2 remote-vpn
+ crypto auto-ipsec-secure
+ crypto load-management
+ crypto remote-vpn-client
+ interface radio1
+  wlan Indoguna bss 1 primary
+ interface radio2
+  wlan Indoguna bss 1 primary
+ interface ge1
+ interface vlan1
+  ip address dhcp
+  ip address zeroconf secondary
+  ip dhcp client request options all
+ interface pppoe1
+ use firewall-policy default
+ use client-identity-group default
+ logging on
+ service pm sys-restart
+ router ospf
+!
+rf-domain default
+ timezone Asia/Bangkok
+ country-code id
+ use nsight-policy default
+!
+ap7522 B8-50-01-1B-1C-A4
+ use profile default-ap7522
+ use rf-domain default
+ hostname ap7522-1B1CA4
+ location default
+ no adoption-mode
+ no mint mlcp vlan
+ ip name-server 192.168.250.1
+ ip default-gateway 192.168.250.1
+ interface radio1
+ interface ge1
+ interface vlan1
+  no description
+  ip address 192.168.251.132/23
+  ip nat inside
+ interface vlan100
+  no description
+  ip address 192.168.100.2/23
+  ip nat inside
+ use dhcp-server-policy indoguna
+ no virtual-controller
+ rf-domain-manager capable
+ no logging on
+ ip nat inside source list NAT precedence 1 interface vlan1 overload
+!
+ap7522 B8-50-01-1B-30-FC
+ use profile default-ap7522
+ use rf-domain default
+ hostname ap7522-1B30FC
+ interface vlan1
+  ip address 192.168.1.11/24
+ controller host 192.168.1.10
+!
+!
+end
